@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: currency api
+  description:
+    以 http 請求交換資料，回應統一 json 物件，含有 code（狀態碼，這裡只有 0 和 400 分別代表成功和失敗）,
+    result（成功的計算結果）和 message（失敗的訊息）。
+    有驗證三個輸入必填，金額為數字，來源和目標幣別必須存在；然後由於實作計算是用浮點數乘法，所以輸入的金額數字
+    如果過長（不確定，可能超過 10 個數字）會損失精確度，這邊理論上要用字串進行運算，但實務上不一定有需要，所以
+    先保留最簡單作法。
+servers:
+  - url: 'http://localhost:8000'
+paths:
+  /currency:
+    get:
+      summary: 'currency converter endpoint'
+      operationId: currency
+      tags:
+        - currency
+      parameters:
+        - name: amount
+          in: query
+          description: 金額數字
+          required: true
+          schema:
+            type: string
+            example: "12345.6789"
+        - name: fromCurrency
+          in: query
+          description: 來源幣別
+          required: true
+          schema:
+            type: string
+            enum: [ "TWD","USD","JPY" ]
+        - name: toCurrency
+          in: query
+          description: 目標幣別
+          required: true
+          schema:
+            type: string
+            enum: [ "USD","JPY","TWD" ]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    SuccessResponse:
+      type: object
+      required:
+        - code
+        - result
+      properties:
+        code:
+          type: integer
+          default: 0
+        result:
+          description: result amount
+          type: string
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          default: 400
+        message:
+          type: string
