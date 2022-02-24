@@ -4,7 +4,6 @@ import (
 	"currency-converter/handlers"
 	"currency-converter/objects"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
@@ -29,12 +28,11 @@ func Run(args Args) error {
 		return err
 	}
 	router := mux.NewRouter()
-	fmt.Println(currencies)
 	hnd := handlers.NewHandler(currencies)
 	RegisterAllRoutes(router, hnd)
 
 	// start server
-	log.Println("Listing for requests at http://localhost" + args.port + "/currencies")
+	log.Println("Listing for requests at http://localhost" + args.port + "/currency")
 	return http.ListenAndServe(args.port, router)
 }
 
@@ -51,7 +49,7 @@ func RegisterAllRoutes(router *mux.Router, hnd handlers.ICurrencyHandler) {
 }
 
 func parseJsonFile(fileName string) (currencies objects.Currencies, err error) {
-	jsonFile, err := os.Open("currencies.json")
+	jsonFile, err := os.Open(fileName)
 	if err != nil {
 		return currencies, err
 	}
